@@ -1,56 +1,56 @@
-# 🧬 mpox Analysis Pipeline (Illumina & Nanopore)
+# 🧬 mpxv-analyzer
 
 An end-to-end **mpox (Monkeypox virus) sequencing analysis pipeline** supporting both:
 
 - 🧪 Illumina (short-read)
 - 🔬 Nanopore (long-read)
 
-This pipeline performs QC, consensus generation, coverage analysis, clade assignment, and mutation profiling using integrated Nextflow workflows.
-
----
-
-## 📌 Overview
-
-The pipeline processes raw sequencing data into:
-
-- Quality-controlled reads
-- Consensus genomes
-- Coverage statistics
-- Clade assignments (Nextclade & Squirrel)
-- SNP and mutation annotations
-- Final summary report
+This pipeline performs QC, consensus generation, coverage analysis, clade assignment, mutation profiling, and phylogenetic analysis using the integrated tools and Nextflow workflows.
 
 ---
 
 ## 🔄 Workflow Diagram
 
 ```mermaid
-flowchart TD
+  
+flowchart LR
+    A[Input Samplesheet] --> B["nf-qcflow QC"]
 
-A[Input Samplesheet] --> B[nf-qcflow (QC)]
+    B --> C1[Illumina Reads]
+    B --> C2[Nanopore Reads]
 
-B --> C1[Illumina Reads]
-B --> C2[Nanopore Reads]
+    C1 --> D1["ARTIC Illumina Pipeline"]
+    C2 --> D2[Prepare Barcode Structure]
+    D2 --> D3["ARTIC Nanopore Pipeline"]
 
-C1 --> D1[ARTIC Illumina Pipeline]
-C2 --> D2[Prepare Barcode Structure]
-D2 --> D3[ARTIC Nanopore Pipeline]
+    D1 --> E[Consensus FASTA]
+    D3 --> E
 
-D1 --> E[Consensus FASTA]
-D3 --> E
+    E --> F["nf-covflow Coverage"]
 
-E --> F[nf-covflow (Coverage)]
+    F --> G[Summary Report Directory]
 
-F --> G[Summary Report Directory]
+    G --> H[FASTA Stats]
+    H --> I[Filter by Completeness]
 
-G --> H[FASTA Stats]
-H --> I[Filter by Completeness]
+    I --> J[Nextclade]
+    I --> K[Squirrel]
 
-I --> J[Nextclade]
-I --> K[Squirrel]
+    J --> L[Clade Assignment]
+    K --> M["Phylogeny + SNP QC"]
 
-J --> L[Clade Assignment]
-K --> M[Phylogeny + SNP QC]
-
-L --> N[Final Report]
-M --> N
+    L --> N[Final Report]
+    M --> N
+```
+## Installation
+- Download the project
+  ```
+  git clone https://github.com/xiaoli-dong/mpxv-analyzer.git
+  
+  ```
+- Create and activate required conda environment
+  ```
+  conda env create -f path_to_downloaded/mpxv-analyzer/env/environment.yml
+  conda activate virus_env
+  ```
+## Usage
