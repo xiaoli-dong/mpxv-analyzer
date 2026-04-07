@@ -1,6 +1,6 @@
 # 🧬 mpxv-analyzer
 
-An end-to-end **mpox (Monkeypox virus) sequencing analysis pipeline** supporting both:
+An end-to-end **mpxv (Monkeypox virus) sequencing analysis pipeline** supporting both:
 
 - 🧪 Illumina (short-read)
 - 🔬 Nanopore (long-read)
