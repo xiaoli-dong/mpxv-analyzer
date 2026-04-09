@@ -42,15 +42,10 @@ flowchart LR
     L --> N[Final Report]
     M --> N
 ```
-## Installation
-- Download the project
-  ```
-  git clone https://github.com/xiaoli-dong/mpxv-analyzer.git
-  
-  ```
-- Create and activate required conda environment
+## Usage
+- Create and activate required conda environment if it is not available
   ```
   conda env create -f path_to_downloaded/mpxv-analyzer/env/environment.yml
-  conda activate virus_env
+  conda activate mpxv-analyzer-env
   ```
-## Usage
+
