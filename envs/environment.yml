@@ -1,0 +1,16 @@
+# conda env create -f environment.yml
+name: mpxv-analyzer-env
+
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - python=3.11
+  - biopython=1.84
+  - pandas
+  - nextflow=25.10.4
+  - mash=2.3
+  - seqkit=2.13.0
+  - nextclade=3.21.0
+  - squirrel=1.3.2
