@@ -187,12 +187,12 @@ bash scripts/sbatch_submit_nanopore.sh --help
 
 | File | Description |
 |------|-------------|
-| `summary_repoort/mpxv_master.tsv` | Master summary combining QC, consensus, coverage, and clade data |
-| `summary_repoort/ all_consensus.fasta` | conmbined consensus sequence file |
-| `summary_report/all_consensus.high_quality.fasta` | Combined consensus sequence file, in which the completeness of the sequences are >= 80% |
 | `summary_report/reads_*.qc_report.csv` | sequence reads per-sample QC metrics |
+| `summary_repoort/mpxv_master.tsv` | Master summary combining QC, consensus, coverage, and clade data |
+| `summary_repoort/all_consensus.fasta` | conmbined consensus sequence file |
+| `summary_report/all_consensus.high_quality.fasta` | Combined consensus sequence file, in which the completeness of the sequences are >= 80% |
+`summary_report/plot/*.pdf` | Amplicon and chromosome coverage, depth profile and  visualizations |
 | `summary_report/nextclade/nextclade.tsv` | Clade assignments and quality metrics per subgroup |
-| `summary_report/*_stats.tsv` | Consensus coverage and completeness statistics |
-| `summary_report/plot/*.pdf` | Amplicon and chromosome coverage, depth profile and  visualizations |
+| `summary_report/all_consensus.stats.tsv` | Consensus coverage and completeness statistics |
 | `summary_report/squirrel` | Squirrel clade assignment and phylogenetic analysis output |
 
