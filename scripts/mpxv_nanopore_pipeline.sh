@@ -8,7 +8,8 @@ readonly prod_prog_base="/nfs/APL_Genomics/apps/production"
 readonly deve_prog_base="/nfs/Genomics_DEV/projects/xdong/deve"
 
 # Define paths to the pipelines that mpox-analyzer depends on
-readonly path_to_qc_pipeline="${prod_prog_base}/qcflow_pipeline/nf-qcflow"
+#readonly path_to_qc_pipeline="${prod_prog_base}/qcflow_pipeline/nf-qcflow"
+readonly path_to_qc_pipeline="${deve_prog_base}/nf-qcflow"
 readonly path_to_covflow="${prod_prog_base}/covflow_pipeline/nf-covflow"
 readonly path_to_artic_nanopore_pipeline="${deve_prog_base}/artic-mpxv-nf/artic-mpxv-nf"
 
@@ -297,18 +298,19 @@ run_cmd nextflow run "${path_to_covflow}/main.nf" \
 log "=== STEP 5: Preparing final report directory ==="
 
 final_report_dir="$RESULTS_DIR/summary_report"
-mkdir -p "$final_report_dir"
-mkdir -p "$final_report_dir/qc_plots"
+run_cmd mkdir -p "$final_report_dir"
+#mkdir -p "$final_report_dir/qc_plots"
 
 #qcflow outputs
-cp "$RESULTS_DIR/nf-qcflow/report/reads_nanopore.qc_report.csv" "$final_report_dir/"
-cp "$RESULTS_DIR/nf-qcflow/report/reads_nanopore.topmatches.csv" "$final_report_dir/"
+run_cmd cp "$RESULTS_DIR/nf-qcflow/report/reads_nanopore.qc_report.csv" "$final_report_dir/"
+run_cmd cp "$RESULTS_DIR/nf-qcflow/report/reads_nanopore.topmatches.csv" "$final_report_dir/"
 
 #artic outputs
-cp $RESULTS_DIR/artic-mpxv-nf/all_consensus.* $final_report_dir/
-cp $RESULTS_DIR/artic-mpxv-nf/*amplicon_depths.tsv $final_report_dir/
-cp $RESULTS_DIR/artic-mpxv-nf/*normalised.named.vcf.gz* $final_report_dir/
-cp -r $RESULTS_DIR/nf-covflow/report/* "$final_report_dir/" || true
+run_cmd cp $RESULTS_DIR/artic-mpxv-nf/all_consensus.* $final_report_dir/
+#cp $RESULTS_DIR/artic-mpxv-nf/*amplicon_depths.tsv $final_report_dir/
+run_cmd cp $RESULTS_DIR/artic-mpxv-nf/*normalised.named.vcf.gz* $final_report_dir/
+run_cmd cp $RESULTS_DIR/artic-mpxv-nf/*.primertrimmed.rg.sorted.bam* $final_report_dir/
+run_cmd cp -r $RESULTS_DIR/nf-covflow/report/* "$final_report_dir/" || true
 
 
 # Consensus stats
@@ -378,15 +380,17 @@ run_cmd squirrel \
 # ==========================================================
 log "=== STEP 9: Making summary report ==="
 
-cd "$final_report_dir" || error_exit "Failed to cd to summary report dir"
+run_cmd cd "$final_report_dir" || error_exit "Failed to cd to summary report dir"
 
 run_cmd python "$SCRIPT_DIR/make_summary_report.py" \
 --qc reads_nanopore.qc_report.csv \
 --consensus all_consensus.stats.tsv \
 --depth chromosome_coverage_depth_summary.tsv \
 --nextclade nextclade/nextclade.tsv \
+--squirrel squirrel/assignment_report.csv \
 --out mpxv_master.tsv
 
+run_cmd rm -rf squirrel_tmp
 # ==========================================================
 # Cleanup
 # ==========================================================

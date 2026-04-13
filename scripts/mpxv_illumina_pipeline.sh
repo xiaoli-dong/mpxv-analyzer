@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+#export NXF_OFFLINE='true'
 # ==========================================================
 # Paths & constants
 # ==========================================================
@@ -286,17 +287,17 @@ log "=== STEP 5: Preparing final report directory ==="
 
 final_report_dir="$RESULTS_DIR/summary_report"
 run_cmd mkdir -p "$final_report_dir"
-run_cmd mkdir -p "$final_report_dir/qc_plots"
+#run_cmd mkdir -p "$final_report_dir/qc_plots"
 #qcflow outputs
 run_cmd cp "$RESULTS_DIR/nf-qcflow/report/reads_illumina.qc_report.csv" "$final_report_dir/"
 run_cmd cp "$RESULTS_DIR/nf-qcflow/report/reads_illumina.topmatches.csv" "$final_report_dir/"
 
 #artic outputs
-run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/qc_plots/*.png $final_report_dir/qc_plots/
-run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/sequenceAnalysis_align_trim/* $final_report_dir/
-run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/sequenceAnalysis_callConsensusFreebayes/* $final_report_dir/
+#run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/qc_plots/*.png $final_report_dir/qc_plots/
+run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/sequenceAnalysis_align_trim/*.bam* $final_report_dir/
+run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/sequenceAnalysis_callConsensusFreebayes/*.vcf $final_report_dir/
 run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/*all_consensus.fasta $final_report_dir/all_consensus.fasta
-run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/*qc.csv $final_report_dir/all_consensus.qc.csv
+#run_cmd cp $RESULTS_DIR/artic-mpxv-illumina-nf/*qc.csv $final_report_dir/all_consensus.qc.csv
 run_cmd cp -r $RESULTS_DIR/nf-covflow/report/* "$final_report_dir/" || true
 
 # Consensus stats
@@ -378,8 +379,10 @@ run_cmd python "$SCRIPT_DIR/make_summary_report.py" \
 --consensus all_consensus.stats.tsv \
 --depth chromosome_coverage_depth_summary.tsv \
 --nextclade nextclade/nextclade.tsv \
+--squirrel squirrel/assignment_report.csv \
 --out mpxv_master.tsv
 
+run_cmd rm -rf squirrel_tmp
 # ==========================================================
 # Cleanup
 # ==========================================================
