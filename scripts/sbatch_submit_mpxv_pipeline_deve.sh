@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=mpxv-analyzer-nanopore
+#SBATCH --job-name=mpxv-pipeline
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
@@ -14,10 +14,9 @@ set -euo pipefail
 # ==========================================================
 # Help & usage
 # ==========================================================
-
 show_help() {
     cat << EOF
-MPXV Nanopore SLURM submission script
+MPXV SLURM submission script
 
 USAGE:
  sbatch $0 <samplesheet.csv> <results_dir> [options]
@@ -27,14 +26,20 @@ REQUIRED:
   results_dir           Output directory for pipeline results
 
 OPTIONS:
+  --platform illumina|nanopore
+   Specify sequencing platform (default: illumina)
   --qcflow-config FILE     Custom nf-qcflow config file
+  --completeness FLOAT    Completeness threshold for clade assignment(default: 0.8)
   -h, --help               Show this help
 
 EXAMPLES:
-  sbatch $0 samplesheet.csv results_dir
+  sbatch $0 samplesheet.csv results_dir \
+    --platform illumina
 
   sbatch $0 samplesheet.csv results_dir \
-      --qcflow-config qcflow.config
+    --platform illumina \
+    --completeness 0.8 \
+    --qcflow-config qcflow.config \
 
 CHECK HELP WITHOUT SUBMITTING:
   bash $0 --help
@@ -47,23 +52,21 @@ NOTES:
 
 samplesheet example
     sample,fastq_1,fastq_2,long_fastq
-    sid,NA,NA,long.fastq.gz
+    sid,r1.fastq.gz,r2.fastq.gz,NA
 
 EOF
 }
 
-# Allow help without sbatch
 case "${1:-}" in
     -h|--help)
         show_help
         exit 0
-        ;;
+    ;;
 esac
 
 # ==========================================================
 # Required arguments
 # ==========================================================
-
 if [[ $# -lt 2 ]]; then
     echo "ERROR: Missing required arguments"
     show_help
@@ -74,61 +77,41 @@ SAMPLESHEET="$1"
 RESULTS_DIR="$2"
 shift 2
 
-# Optional named arguments
 QCFLOW_CONFIG=""
 
 # ==========================================================
-# Parse named options
+# Parse options
 # ==========================================================
-
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --qcflow-config)
             QCFLOW_CONFIG="${2:-}"
             shift 2
-            ;;
+        ;;
+        --platform) PLATFORM="$2"; shift 2 ;;
+        --completeness) COMPLETENESS_THRESHOLD="$2"; shift 2 ;;
         -h|--help)
             show_help
             exit 0
-            ;;
+        ;;
         *)
             echo "ERROR: Unknown option: $1"
-            show_help
             exit 1
-            ;;
+        ;;
     esac
 done
 
 # ==========================================================
 # Validation
 # ==========================================================
+[[ -s "$SAMPLESHEET" ]] || { echo "ERROR: Samplesheet missing: $SAMPLESHEET"; exit 1; }
 
-if [[ ! -s "$SAMPLESHEET" ]]; then
-    echo "ERROR: Samplesheet missing or empty: $SAMPLESHEET"
-    exit 1
-fi
-
-validate_config() {
-    local cfg="$1"
-    local name="$2"
-
-    if [[ -n "$cfg" ]]; then
-        [[ -f "$cfg" ]] || { echo "ERROR: $name config not found: $cfg"; exit 1; }
-        echo "$(cd "$(dirname "$cfg")" && pwd)/$(basename "$cfg")"
-    fi
-}
-
-
-QCFLOW_CONFIG="$(validate_config "$QCFLOW_CONFIG" "QCflow")"
-
-# Resolve absolute paths
 SAMPLESHEET="$(cd "$(dirname "$SAMPLESHEET")" && pwd)/$(basename "$SAMPLESHEET")"
 RESULTS_DIR="$(mkdir -p "$RESULTS_DIR" && cd "$RESULTS_DIR" && pwd)"
 
 # ==========================================================
 # Logging
 # ==========================================================
-
 echo "=================================================="
 echo "SLURM job ID        : ${SLURM_JOB_ID:-N/A}"
 echo "Job name            : ${SLURM_JOB_NAME:-N/A}"
@@ -137,6 +120,8 @@ echo "CPUs per task       : ${SLURM_CPUS_PER_TASK:-N/A}"
 echo "Samplesheet         : $SAMPLESHEET"
 echo "Results directory   : $RESULTS_DIR"
 [[ -n "$QCFLOW_CONFIG" ]] && echo "QCflow config       : $QCFLOW_CONFIG"
+[[ -n "$PLATFORM" ]] && echo "Platform            : $PLATFORM"
+[[ -n "$COMPLETENESS_THRESHOLD" ]] && echo "Completeness thresh : $COMPLETENESS_THRESHOLD"
 echo "Start time          : $(date)"
 echo "=================================================="
 
@@ -198,15 +183,16 @@ echo "[INFO] Activated conda environment: $ENV_PATH"
 # ==========================================================
 # Run pipeline
 # ==========================================================
-
-PIPELINE="${prog_base}/scripts/mpxv_nanopore_pipeline.sh"
+PIPELINE="${prog_base}/scripts/mpxv_pipeline.sh"
 
 [[ -f "$PIPELINE" ]] || { echo "ERROR: Pipeline script not found: $PIPELINE"; exit 1; }
 
 CMD=(bash "$PIPELINE" "$SAMPLESHEET" "$RESULTS_DIR")
 [[ -n "$QCFLOW_CONFIG" ]] && CMD+=(--qcflow-config "$QCFLOW_CONFIG")
+[[ -n "$PLATFORM" ]] && CMD+=(--platform "$PLATFORM")
+[[ -n "$COMPLETENESS_THRESHOLD" ]] && CMD+=(--completeness "$COMPLETENESS_THRESHOLD")
 
-echo "Running pipeline command:"
+echo "Running pipeline:"
 printf '  %q' "${CMD[@]}"
 echo
 
@@ -216,7 +202,6 @@ exit_code=$?
 # ==========================================================
 # Finish
 # ==========================================================
-
 echo "=================================================="
 echo "Pipeline exit code  : $exit_code"
 echo "End time            : $(date)"
