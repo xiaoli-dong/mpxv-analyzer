@@ -15,8 +15,8 @@ readonly deve_prog_base="/nfs/Genomics_DEV/projects/xdong/deve"
 
 readonly path_to_qc_pipeline="${prod_prog_base}/qcflow_pipeline/nf-qcflow"
 readonly path_to_covflow="${prod_prog_base}/covflow_pipeline/nf-covflow"
-readonly path_to_artic_illumina_pipeline="${deve_prog_base}/artic-mpxv-illumina-nf/artic-mpxv-illumina-nf"
-readonly path_to_artic_nanopore_pipeline="${deve_prog_base}/artic-mpxv-nf/artic-mpxv-nf"
+readonly path_to_artic_illumina_pipeline="${prod_prog_base}/artic-mpxv-illumina-nf"
+readonly path_to_artic_nanopore_pipeline="${prod_prog_base}/artic-mpxv-nf"
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"

@@ -125,7 +125,7 @@ echo "Results directory   : $RESULTS_DIR"
 echo "Start time          : $(date)"
 echo "=================================================="
 
-prog_base="/nfs/Genomics_DEV/projects/xdong/deve/mpxv-analyzer"
+prog_base="/nfs/APL_Genomics/apps/production/mpxv_pipeline/mpxv-analyzer"
 # ==========================================================
 # Conda setup (activate mode, NFS-safe)
 # ==========================================================
