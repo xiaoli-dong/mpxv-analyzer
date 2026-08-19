@@ -13,11 +13,12 @@ COMPLETENESS_THRESHOLD="0.8"
 readonly prod_prog_base="/nfs/APL_Genomics/apps/production"
 readonly deve_prog_base="/nfs/Genomics_DEV/projects/xdong/deve"
 
-readonly path_to_qc_pipeline="${prod_prog_base}/qcflow_pipeline/nf-qcflow"
-readonly path_to_covflow="${prod_prog_base}/covflow_pipeline/nf-covflow"
-readonly path_to_artic_illumina_pipeline="${prod_prog_base}/artic-mpxv-illumina-nf"
-readonly path_to_artic_nanopore_pipeline="${prod_prog_base}/artic-mpxv-nf"
+#readonly path_to_qc_pipeline="${prod_prog_base}/qcflow_pipeline/nf-qcflow"
+readonly path_to_qc_pipeline="${deve_prog_base}/nf-qcflow"
+readonly path_to_covflow="${deve_prog_base}/nf-covflow"
 
+readonly path_to_artic_illumina_pipeline="${prod_prog_base}/mpxv_pipeline/artic-mpxv-illumina-nf"
+readonly path_to_artic_nanopore_pipeline="${prod_prog_base}/mpxv_pipeline/artic-mpxv-nf"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 
@@ -142,7 +143,7 @@ if [[ "$PLATFORM" == "illumina" ]]; then
     VCF_SRC=("$ARTIC_DIR"/sequenceAnalysis_callConsensusFreebayes/*vcf*)
     CONSENSUS="$ARTIC_DIR"/$prefix.all_consensus.fasta
 
-    elif [[ "$PLATFORM" == "nanopore" ]]; then
+elif [[ "$PLATFORM" == "nanopore" ]]; then
 
     mkdir -p "$RESULTS_DIR/fastq_to_artic"
     echo "barcode,sample_name,alias,type" > "$RESULTS_DIR/fastq_to_artic/samplesheet.csv"
@@ -164,14 +165,15 @@ if [[ "$PLATFORM" == "illumina" ]]; then
     --sample_sheet $RESULTS_DIR/fastq_to_artic/samplesheet.csv \
     --out_dir ${ARTIC_DIR} \
     --skip_squirrel true \
-    --override_model_dir /usr/local/bin/models \
+    #--override_model_dir /nfs/APL_Genomics/db/prod/clair3/artic_models \
+    #--override_model_dir  /nfs/APL_Genomics/db/prod/artic_clair3_model
     -resume
 
     BAM_SRC=("$ARTIC_DIR"/*.primertrimmed.rg.sorted.bam*)
     VCF_SRC=("$ARTIC_DIR"/*vcf*)
     CONSENSUS="$ARTIC_DIR"/all_consensus.fasta
 fi
-
+#--override_model_dir /usr/local/bin/models \
 # ==========================================================
 # STEP 3: COVFLOW
 # ==========================================================
